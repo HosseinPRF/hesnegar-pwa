@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>حس‌نگار — ثبت و تنظیم احساس (PWA آفلاین)</title>
+  <meta name="description" content="ثبت سریع و تحلیل عمیق احساس‌ها + جعبه ابزار تنظیم هیجان، کاملاً آفلاین روی دستگاه شما">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="appbar">
+    <div class="brand">
+      <img src="./icon.svg" alt="حس‌نگار" class="logo">
+      <div>
+        <h1>حس‌نگار</h1>
+        <div class="subtitle">ثبت سریع • تحلیل عمیق • آفلاین</div>
+      </div>
+    </div>
+    <nav class="actions">
+      <button id="btnExport" class="btn ghost">خروجی JSON ⤓</button>
+      <button id="btnImport" class="btn ghost">ورود JSON ⤒</button>
+      <input id="fileImport" type="file" accept="application/json" hidden>
+      <button id="btnReset" class="btn danger">پاک‌سازی داده‌ها</button>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Home -->
+    <section class="screen" data-screen="home">
+      <div class="hero">
+        <h2>امروز چی توی تو فعال شده؟</h2>
+        <p class="helper">هدف این اپ «کنترلِ زورکی» نیست؛ هدف اینه حس رو <b>به خودآگاهی بیاری</b>، منشأش رو بفهمی، و یک <b>انتخابِ کوچک</b> انجام بدی که حالِ تو رو بهتر و مسیرت رو سالم‌تر کنه.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>ثبت سریع (۶۰–۹۰ ثانیه)</h3>
+          <p class="helper">وقتی وسط کار/جمع/ترید هستی و می‌خوای سریع جلوی گیرکردن رو بگیری.</p>
+          <button class="btn primary" id="goQuick">شروع ثبت سریع</button>
+        </div>
+        <div class="card">
+          <h3>تحلیل عمیق (۷–۱۲ دقیقه)</h3>
+          <p class="helper">وقتی می‌خوای دقیق بفهمی «چی شد؟ چرا؟ نیازم چی بود؟» و یک پلن عملی بسازی.</p>
+          <button class="btn primary" id="goDeep">شروع تحلیل عمیق</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>جعبه ابزار تنظیم</h3>
+          <p class="helper">تکنیک‌های کوتاه علمی (بدن/ذهن/خودشفقت/ACT) با انتخاب هوشمند.</p>
+          <button class="btn" id="goToolkit">باز کردن ابزارها</button>
+        </div>
+        <div class="card">
+          <h3>سوابق و الگوها</h3>
+          <p class="helper">همه‌چیز فقط روی دستگاه شماست. اینجا می‌تونی رکوردها رو ببینی، کپی/حذف کنی و چند الگوی ساده بگیری.</p>
+          <button class="btn" id="goHistory">مشاهده سوابق</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <details>
+          <summary>راهنمای خیلی کوتاهِ مدل</summary>
+          <div class="helper">
+            • <b>واقعیت</b> ≠ <b>داستان ذهن</b> (CBT/ACT) — جداشون کن.<br>
+            • <b>نیاز</b> پشتِ حس‌هاست (تئوری انتخاب: تعلق/ارزشمندی/آزادی/تفریح/امنیت).<br>
+            • اگر شدت بالاست (۶ به بالا)، اول <b>بدن</b> را تنظیم کن، بعد تحلیل.<br>
+            • «انتخاب» یعنی یک قدم کوچک قابل کنترل (فکر/عمل) نه جنگیدن با احساس.
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Quick: Step 1 -->
+    <section class="screen hidden" data-screen="quick-1">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">ثبت سریع • ۱/۳</div>
+      </div>
+      <h2>اسم حس + شدت</h2>
+      <p class="helper">۱–۳ احساس انتخاب کن. (اگر نبود، اضافه کن)</p>
+
+      <div id="qcEmotionChips" class="chips"></div>
+      <div class="inline-add">
+        <input id="qcEmotionInput" type="text" placeholder="افزودن احساس دلخواه...">
+        <button id="qcEmotionAdd" class="btn">افزودن</button>
+      </div>
+
+      <div id="qcEmotionSelected" class="selected">— هنوز چیزی انتخاب نشده.</div>
+
+      <label class="field">
+        <span>حس غالب از نظر تو</span>
+        <select id="qcValence">
+          <option value="bad">بد/سنگین</option>
+          <option value="good">خوب/سبک</option>
+          <option value="neutral">خنثی/نامشخص</option>
+        </select>
+      </label>
+
+      
+      <div class="grid">
+        <label class="field">
+          <span>شدت (۰ تا ۱۰)</span>
+          <input id="qcIntensity" type="range" min="0" max="10" value="5">
+          <div class="rangeRow"><span id="qcIntensityVal" class="badge">5</span><span class="muted">۰ آرام • ۱۰ خیلی شدید</span></div>
+        </label>
+        <label class="field">
+          <span>بدن کجا حس می‌کنی؟</span>
+          <select id="qcBody">
+            <option value="">— انتخاب کن —</option>
+            <option>گلو</option>
+            <option>سینه</option>
+            <option>شکم</option>
+            <option>سر</option>
+            <option>فک/صورت</option>
+            <option>دست/پا</option>
+            <option>کل بدن</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="nav-row">
+        <div></div>
+        <button class="btn primary" id="toQuick2">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Quick: Step 2 -->
+    <section class="screen hidden" data-screen="quick-2">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">ثبت سریع • ۲/۳</div>
+      </div>
+      <h2>تریگر + جمله ذهن</h2>
+      <label class="field">
+        <span>چی جرقه زد؟ (تریگر)</span>
+        <textarea id="qcTrigger" rows="2" placeholder="مثلاً: دیدم دوستم سود کرده..."></textarea>
+      </label>
+
+      <label class="field">
+        <span>ذهنم داره چی می‌گه؟ (یک جمله)</span>
+        <input id="qcMind" type="text" placeholder="مثلاً: من عقب افتادم.">
+      </label>
+
+      <div id="qcSafety" class="card hidden"></div>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn primary" id="toQuick3">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Quick: Step 3 -->
+    <section class="screen hidden" data-screen="quick-3">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">ثبت سریع • ۳/۳</div>
+      </div>
+      <h2>تنظیم ۶۰ ثانیه‌ای + قدم بعدی</h2>
+      <p class="helper">یک تکنیک کوتاه انتخاب کن. (می‌تونی بعداً تحلیل عمیق هم انجام بدی)</p>
+
+      <div id="qcToolChips" class="chips"></div>
+      <div class="card" id="qcToolInfo"></div>
+
+      <label class="field">
+        <span>قدم بعدیِ کوچک (۲–۱۰ دقیقه)</span>
+        <input id="qcNextAction" type="text" placeholder="مثلاً: ۱۰ دقیقه ژورنال، یا پیاده‌روی کوتاه...">
+      </label>
+
+      <label class="field">
+        <span>شدت بعد از تنظیم (۰ تا ۱۰)</span>
+        <input id="qcAfter" type="range" min="0" max="10" value="4">
+        <div class="rangeRow"><span id="qcAfterVal" class="badge">4</span><span class="muted">برای یادگیری خودت ثبت کن</span></div>
+      </label>
+
+      <div class="row wrap">
+        <button class="btn" id="qcCopy">کپی خلاصه</button>
+        <button class="btn" id="qcShare">اشتراک</button>
+        <button class="btn primary" id="qcSave">ذخیره</button>
+      </div>
+
+      <pre id="qcSummary" class="summary"></pre>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn" id="qcGoHome">خانه</button>
+      </div>
+    </section>
+
+    <!-- Deep: Step 1 -->
+    <section class="screen hidden" data-screen="deep-1">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">تحلیل عمیق • ۱/۵</div>
+      </div>
+      <h2>مشاهده‌گری دقیق</h2>
+      <div class="grid">
+        <label class="field">
+          <span>احساس(ها)</span>
+          <input id="ddEmotions" type="text" placeholder="مثلاً: حسادت، شرم، اضطراب">
+          <small class="muted">می‌تونی با کاما جدا کنی</small>
+        </label>
+        <label class="field">
+          <span>شدت (۰ تا ۱۰)</span>
+          <input id="ddIntensity" type="range" min="0" max="10" value="6">
+          <div class="rangeRow"><span id="ddIntensityVal" class="badge">6</span><span class="muted">۰ آرام • ۱۰ خیلی شدید</span></div>
+        </label>
+      </div>
+      <div class="grid">
+        <label class="field">
+          <span>بدن کجا حس می‌کنی؟</span>
+          <select id="ddBody">
+            <option value="">— انتخاب کن —</option>
+            <option>گلو</option>
+            <option>سینه</option>
+            <option>شکم</option>
+            <option>سر</option>
+            <option>فک/صورت</option>
+            <option>دست/پا</option>
+            <option>کل بدن</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>تریگر (چی جرقه زد؟)</span>
+          <input id="ddTrigger" type="text" placeholder="مثلاً: خبر سود دوستم">
+        </label>
+      </div>
+
+      <div class="nav-row">
+        <div></div>
+        <button class="btn primary" id="toDeep2">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Deep: Step 2 -->
+    <section class="screen hidden" data-screen="deep-2">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">تحلیل عمیق • ۲/۵</div>
+      </div>
+      <h2>واقعیت vs داستان ذهن</h2>
+      <div class="grid">
+        <label class="field">
+          <span>واقعیتِ قابل مشاهده</span>
+          <textarea id="ddFacts" rows="3" placeholder="چه اتفاقی افتاد؟ بدون تفسیر..."></textarea>
+        </label>
+        <label class="field">
+          <span>داستان/تعبیر ذهن</span>
+          <textarea id="ddStory" rows="3" placeholder="یعنی چی درباره من/دنیا؟"></textarea>
+        </label>
+      </div>
+
+      <div class="card">
+        <div class="helper"><b>نکته:</b> خیلی وقت‌ها احساس شدید از «داستان» تغذیه می‌کنه، نه از خود واقعیت.</div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn primary" id="toDeep3">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Deep: Step 3 -->
+    <section class="screen hidden" data-screen="deep-3">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">تحلیل عمیق • ۳/۵</div>
+      </div>
+      <h2>احساس زیرین + نیاز</h2>
+      <div class="grid">
+        <label class="field">
+          <span>احساس(های) زیرین (اگر هست)</span>
+          <input id="ddUnder" type="text" placeholder="مثلاً: ترس، شرم، غم">
+        </label>
+        <label class="field">
+          <span>نشخوار ذهنی/گیرکردن بود؟</span>
+          <select id="ddRumination">
+            <option>نامشخص</option>
+            <option>بله</option>
+            <option>خیر</option>
+          </select>
+        </label>
+      </div>
+
+      <h3>نیاز فعال‌شده (تئوری انتخاب)</h3>
+      <p class="helper">حداکثر ۲ مورد انتخاب کن.</p>
+      <div id="ddNeedChips" class="chips needs"></div>
+      <div id="ddNeedHints" class="hints"></div>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn primary" id="toDeep4">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Deep: Step 4 -->
+    <section class="screen hidden" data-screen="deep-4">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">تحلیل عمیق • ۴/۵</div>
+      </div>
+      <h2>گفتگوی درونی (TA/Parts) + ریشه</h2>
+
+      <div class="grid">
+        <label class="field">
+          <span>صدای غالب توی سرم شبیه کدومه؟</span>
+          <select id="ddVoice">
+            <option value="">— انتخاب کن —</option>
+            <option>والدِ منتقد</option>
+            <option>والدِ حمایتگر</option>
+            <option>کودکِ ترسیده/آسیب‌پذیر</option>
+            <option>کودکِ سرکش/خشمگین</option>
+            <option>بالغِ منطقی</option>
+            <option>نامشخص</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>این حس «آشناست»؟ اولین بار کی یادته؟</span>
+          <input id="ddFirst" type="text" placeholder="مثلاً: دوران مدرسه، موقع مقایسه شدن...">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>یک جملهٔ بالغِ جایگزین (ضد-شرم/ضد-فاجعه‌سازی)</span>
+        <input id="ddAdult" type="text" placeholder="مثلاً: نتیجهٔ امروز = ارزش من نیست.">
+      </label>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn primary" id="toDeep5">ادامه</button>
+      </div>
+    </section>
+
+    <!-- Deep: Step 5 -->
+    <section class="screen hidden" data-screen="deep-5">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">تحلیل عمیق • ۵/۵</div>
+      </div>
+      <h2>انتخاب تکنیک + پلن عمل</h2>
+
+      <div class="card" id="ddRecommendation"></div>
+
+      <h3>تکنیک پیشنهادی</h3>
+      <div id="ddToolChips" class="chips"></div>
+      <div class="card" id="ddToolInfo"></div>
+
+      <label class="field">
+        <span>پلن عملِ کوچک (امروز)</span>
+        <textarea id="ddPlan" rows="3" placeholder="۱) ... (۵–۱۵ دقیقه)
+۲) ... (اگر نیاز به مرز/گفتگو هست)"></textarea>
+      </label>
+
+      <div class="grid">
+        <label class="field">
+          <span>شدت بعد از تنظیم (۰ تا ۱۰)</span>
+          <input id="ddAfter" type="range" min="0" max="10" value="4">
+          <div class="rangeRow"><span id="ddAfterVal" class="badge">4</span><span class="muted">برای ارزیابی اثر تکنیک</span></div>
+        </label>
+        <label class="field">
+          <span>اگر دوباره رخ بده، دفعه بعد چه می‌کنم؟</span>
+          <input id="ddNextTime" type="text" placeholder="مثلاً: قبل از مقایسه، ۶۰ ثانیه تنظیم بدن...">
+        </label>
+      </div>
+
+      <div class="row wrap">
+        <button class="btn" id="ddCopy">کپی خلاصه</button>
+        <button class="btn" id="ddShare">اشتراک</button>
+        <button class="btn primary" id="ddSave">ذخیره</button>
+      </div>
+
+      <pre id="ddSummary" class="summary"></pre>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn" id="ddGoHome">خانه</button>
+      </div>
+    </section>
+
+    <!-- Toolkit -->
+    <section class="screen hidden" data-screen="toolkit">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">جعبه ابزار</div>
+      </div>
+      <h2>تکنیک‌های کوتاه تنظیم هیجان</h2>
+      <p class="helper">این‌ها جای درمان نیستند، اما برای مدیریت روزمره خیلی کمک می‌کنند. اگر علائم شدید/طولانی داری، کمک حرفه‌ای بهترین گزینه است.</p>
+
+      <div id="tkList" class="grid2"></div>
+
+      <div class="card">
+        <h3>قانون Cooldown</h3>
+        <div class="helper">اگر شدت احساس بالای <b>۶/۱۰</b> است، تصمیم‌های مهم (مثلاً ترید/پیام حساس/بحث جدی) را <b>تعویق</b> بده. اول تنظیم، بعد تصمیم.</div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn" id="tkGoHome">خانه</button>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="screen hidden" data-screen="history">
+      <div class="topbar">
+        <button class="btn" data-back>برگشت</button>
+        <div class="crumb">سوابق و الگوها</div>
+      </div>
+      <h2>سوابق ذخیره‌شده</h2>
+
+      <div class="row wrap">
+        <select id="hxFilter" class="btn">
+          <option value="all">همه</option>
+          <option value="quick">ثبت سریع</option>
+          <option value="deep">تحلیل عمیق</option>
+        </select>
+        <button class="btn" id="hxRefresh">بروزرسانی</button>
+      </div>
+
+      <div class="card">
+        <h3>الگوهای ساده</h3>
+        <div id="hxStats" class="helper">—</div>
+      </div>
+
+      <div id="hxList"></div>
+
+      <div class="nav-row">
+        <button class="btn" data-back>برگشت</button>
+        <button class="btn" id="hxGoHome">خانه</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <small>نسخه PWA آفلاین • همه‌چیز فقط روی دستگاه شما ذخیره می‌شود.</small>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
